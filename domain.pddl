@@ -1,5 +1,5 @@
 (define (domain healthcare)
-  (:requirements :strips)
+  (:requirements :strips :typing :negative-preconditions)
   
   ; Define the objects used in the domain
   (:types
@@ -7,6 +7,7 @@
     doctor - object
     medicine - object
     hospital - object
+    symptom - object
   )
 
   ; Define the predicates used in the domain
@@ -17,6 +18,7 @@
     (treated_with ?patient - patient ?medicine - medicine)
     (admitted_to ?patient - patient ?hospital - hospital)
     (prescription ?patient - patient ?medicine - medicine)
+    (cured ?patient - patient)
   )
 
   ; Define the actions that can be taken in the domain
@@ -41,11 +43,11 @@
   )
 
   (:action prescribe_medicine
-    :parameters (?patient - patient ?medicine - medicine ?doctor - doctor)
+    :parameters (?patient - patient ?symptom - symptom ?medicine - medicine ?doctor - doctor)
     :precondition (and
       (treated_by ?patient ?doctor)
       (has_symptom ?patient ?symptom)
-      (treat ?medicine ?symptom)
+      (treats ?medicine ?symptom)
     )
     :effect (prescription ?patient ?medicine)
   )
@@ -73,9 +75,12 @@
   )
 
   (:action discharge
-    :parameters (?patient - patient)
-    :precondition (admitted_to ?patient ?hospital)
-    :effect (not (admitted_to ?patient ?hospital))
+    :parameters (?patient - patient ?hospital - hospital)
+    :precondition (and
+      (admitted_to ?patient ?hospital)
+      (not (has_symptom ?patient))
+    )
+    :effect (and (cured ?patient) (not (admitted_to ?patient ?hospital)))
   )
 
   (:action cancel_treatment
@@ -84,4 +89,3 @@
     :effect (not (treated_with ?patient ?medicine))
   )
 )
-
