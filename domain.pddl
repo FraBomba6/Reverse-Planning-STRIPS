@@ -6,7 +6,6 @@
     patient - object
     doctor - object
     medicine - object
-    hospital - object
     symptom - object
   )
 
@@ -16,70 +15,72 @@
     (treats ?medicine - medicine ?symptom - symptom)
     (treated_by ?patient - patient ?doctor - doctor)
     (treated_with ?patient - patient ?medicine - medicine)
-    (admitted_to ?patient - patient ?hospital - hospital)
-    (prescription ?patient - patient ?medicine - medicine)
+    (prescription ?patient - patient ?medicine - medicine ?doctor - doctor)
     (cured ?patient - patient)
+    (allergic ?patient - patient ?medicine - medicine)
+    (specialist ?doctor - doctor ?symptom - symptom)
   )
 
   ; Define the actions that can be taken in the domain
-  (:action admit
-    :parameters (?patient - patient ?hospital - hospital)
-    :precondition (and
-      (not (admitted_to ?patient ?hospital))
-      (not (cured ?patient))
-    )
-    :effect (admitted_to ?patient ?hospital)
-  )
-
   (:action assign_doctor
     :parameters (?patient - patient ?doctor - doctor)
-    :precondition (and (not (treated_by ?patient ?doctor)) (exists (?hospital - hospital) (admitted_to ?patient ?hospital)))
+    :precondition (not (treated_by ?patient ?doctor))
     :effect (treated_by ?patient ?doctor)
   )
 
-  (:action diagnose_symptom
-    :parameters (?patient - patient ?symptom - symptom ?doctor - doctor)
-    :precondition (and
-      (treated_by ?patient ?doctor)
-    )
-    :effect (has_symptom ?patient ?symptom)
+  (:action remove_doctor
+      :parameters (?patient - patient ?doctor - doctor)
+      :precondition (treated_by ?patient ?doctor)
+      :effect (not (treated_by ?patient ?doctor))
   )
 
   (:action prescribe_medicine
     :parameters (?patient - patient ?symptom - symptom ?medicine - medicine ?doctor - doctor)
     :precondition (and
+      (specialist ?doctor ?symptom)
       (treated_by ?patient ?doctor)
       (has_symptom ?patient ?symptom)
       (treats ?medicine ?symptom)
+      (not (exists (?old_medicine - medicine ?doctor2 - doctor) (prescription ?patient ?old_medicine ?doctor2)))
     )
-    :effect (prescription ?patient ?medicine)
+    :effect (prescription ?patient ?medicine ?doctor)
+  )
+
+  (:action remove_prescription
+    :parameters (?patient - patient ?medicine - medicine ?doctor - doctor)
+    :precondition (and
+      (prescription ?patient ?medicine ?doctor)
+      (not (treated_with ?patient ?medicine))
+      (treated_by ?patient ?doctor)
+    )
+    :effect (not (prescription ?patient ?medicine ?doctor))
   )
 
   (:action treat
     :parameters (?patient - patient ?medicine - medicine ?doctor - doctor)
     :precondition (and
-      (prescription ?patient ?medicine)
+      (prescription ?patient ?medicine ?doctor)
       (treated_by ?patient ?doctor)
     )
     :effect (treated_with ?patient ?medicine)
   )
 
-  (:action change_medicine
-    :parameters (?patient - patient ?medicine - medicine ?new_medicine - medicine)
-    :precondition (and
-      (treated_with ?patient ?medicine)
-      (prescription ?patient ?new_medicine)
-    )
-    :effect (and
-      (not (treated_with ?patient ?medicine))
-      (treated_with ?patient ?new_medicine)
-      (not (prescription ?patient ?medicine))
-    )
+  (:action remove_treatment
+      :parameters (?patient - patient ?medicine - medicine ?doctor - doctor)
+      :precondition (and 
+        (treated_with ?patient ?medicine)
+        (treated_by ?patient ?doctor)  
+      )
+      :effect (not (treated_with ?patient ?medicine))
   )
 
   (:action cure
       :parameters (?patient - patient ?medicine - medicine ?symptom - symptom)
-      :precondition (treated_with ?patient ?medicine)
+      :precondition (and
+        (treated_with ?patient ?medicine)
+        (treats ?medicine ?symptom)
+        (not (allergic ?patient ?medicine))
+      )
       :effect (not (has_symptom ?patient ?symptom))
   )
 
@@ -93,17 +94,8 @@
   )
 
   (:action discharge
-    :parameters (?patient - patient ?hospital - hospital)
-    :precondition (and
-      (admitted_to ?patient ?hospital)
-      (cured ?patient)
-    )
-    :effect (not (admitted_to ?patient ?hospital))
-  )
-
-  (:action cancel_treatment
-    :parameters (?patient - patient ?medicine - medicine)
-    :precondition (treated_with ?patient ?medicine)
-    :effect (not (treated_with ?patient ?medicine))
+    :parameters (?patient - patient ?doctor - doctor)
+    :precondition (cured ?patient)
+    :effect (not (treated_by ?patient ?doctor))
   )
 )
