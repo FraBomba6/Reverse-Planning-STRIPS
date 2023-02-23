@@ -35,10 +35,14 @@
   (:goal
     ; All patients are cured of their symptoms
     (and
-        (cured patient1)
-        (cured patient2)
-        (cured patient3)
-        (cured patient4)
+      (cured patient1)
+      (cured patient2)
+      (cured patient3)
+      (cured patient4)
+      (not (admitted_to patient1 hospital1))
+      (not (admitted_to patient2 hospital1))
+      (not (admitted_to patient3 hospital1))
+      (not (admitted_to patient4 hospital1))
     )
   )
 )

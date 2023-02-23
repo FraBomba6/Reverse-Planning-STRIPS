@@ -1,5 +1,5 @@
 (define (domain healthcare)
-  (:requirements :strips :typing :negative-preconditions)
+  (:requirements :strips :typing :negative-preconditions :existential-preconditions)
   
   ; Define the objects used in the domain
   (:types
@@ -24,13 +24,16 @@
   ; Define the actions that can be taken in the domain
   (:action admit
     :parameters (?patient - patient ?hospital - hospital)
-    :precondition (not (admitted_to ?patient ?hospital))
+    :precondition (and
+      (not (admitted_to ?patient ?hospital))
+      (not (cured ?patient))
+    )
     :effect (admitted_to ?patient ?hospital)
   )
 
   (:action assign_doctor
     :parameters (?patient - patient ?doctor - doctor)
-    :precondition (not (treated_by ?patient ?doctor))
+    :precondition (and (not (treated_by ?patient ?doctor)) (exists (?hospital - hospital) (admitted_to ?patient ?hospital)))
     :effect (treated_by ?patient ?doctor)
   )
 
@@ -74,13 +77,28 @@
     )
   )
 
+  (:action cure
+      :parameters (?patient - patient ?medicine - medicine ?symptom - symptom)
+      :precondition (treated_with ?patient ?medicine)
+      :effect (not (has_symptom ?patient ?symptom))
+  )
+
+  (:action check_health
+      :parameters (?patient - patient ?doctor - doctor)
+      :precondition (and
+        (not (exists (?symptom - symptom) (has_symptom ?patient ?symptom)))
+        (treated_by ?patient ?doctor)
+      )
+      :effect (cured ?patient)
+  )
+
   (:action discharge
     :parameters (?patient - patient ?hospital - hospital)
     :precondition (and
       (admitted_to ?patient ?hospital)
-      (not (has_symptom ?patient))
+      (cured ?patient)
     )
-    :effect (and (cured ?patient) (not (admitted_to ?patient ?hospital)))
+    :effect (not (admitted_to ?patient ?hospital))
   )
 
   (:action cancel_treatment
