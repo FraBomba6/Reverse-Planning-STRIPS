@@ -1,235 +1,96 @@
-(define (domain spacecraft-maneuvering)
+(define (domain moving_company)
   (:requirements :strips :typing :negative-preconditions)
+  ; Define the types of objects in the domain
+  (:types truck furniture location customer - object)
 
-  ; Define the objects used in the domain
-  (:types
-    spacecraft - object
-    satellite - object
-    cargo - object
-    orbit - object
-  )
-
-  ; Define the predicates used in the domain
+  ; Define the predicates for the domain
   (:predicates
-    (re-entry-orbit ?o - orbit)
-    (in-manuever ?s - spacecraft)
-    (target-orbit ?o - orbit)
-    (is_in_target_orbit ?sat - satellite ?o - orbit)
-    (stable-orbit ?s - spacecraft ?o - orbit)
-    (attached-to ?sat - satellite ?s - spacecraft)
-    (docked ?s - spacecraft)
-    (docked-with ?s1 - spacecraft ?s2 - spacecraft)
-    (has-cargo ?s - spacecraft ?c - cargo)
-    (has-satellite ?s - spacecraft ?sat - satellite)
-    (orientation ?s - spacecraft ?o - orbit)
-    (at_orientation ?s - spacecraft)
-    (altitude ?s - spacecraft ?o - orbit)
-    (at_altitude ?s - spacecraft)
-    (inclination ?s - spacecraft ?o - orbit)
-    (at_inclination ?s - spacecraft)
-    (velocity ?s - spacecraft ?o - orbit)
-    (at_velocity ?s - spacecraft)
-    (same-orbit ?s1 - spacecraft ?s2 - spacecraft)
-    (same-orientation ?s1 - spacecraft ?s2 - spacecraft)
-    (same-altitude ?s1 - spacecraft ?s2 - spacecraft)
-    (same-inclination ?s1 - spacecraft ?s2 - spacecraft)
-    (same-velocity ?s1 - spacecraft ?s2 - spacecraft)
-    (able-to-dock ?s1 - spacecraft ?s2 - spacecraft)
-    (sat-deployed ?s - spacecraft)
+    (assembled ?f - furniture)
+    (packed ?f - furniture)
+    (at-location ?l - location ?f - furniture)
+    (truck-location ?l - location ?b - truck)
+    (loaded ?f - furniture ?b - truck)
   )
 
-  ; Define the actions that can be taken in the domain  
-  (:action reach-orientation
-    :parameters (?s - spacecraft ?o - orbit)
+  ; Define the actions for the domain
+  (:action assemble_furniture
+    :parameters (?f - furniture ?l - location ?t - truck)
     :precondition (and
-      (in-manuever ?s)
-      (not (at_orientation ?s))
-      (not (docked ?s))
+      (not (assembled ?f))
+      (not (packed ?f))
+      (at-location ?l ?f)
+      (truck-location ?l ?t)
+      (not (loaded ?f ?t))  
     )
-    :effect (and
-      (orientation ?s ?o)
-      (at_orientation ?s)
-    )
+    :effect (assembled ?f)
   )
   
-  (:action reach-altitude
-    :parameters (?s - spacecraft ?o - orbit)
+  (:action disassemble_furniture
+    :parameters (?f - furniture ?l - location ?t - truck)
     :precondition (and
-      (in-manuever ?s)
-      (not (at_altitude ?s))
-      (not (docked ?s))
+      (assembled ?f)
+      (not (packed ?f))
+      (at-location ?l ?f)
+      (truck-location ?l ?t)
+      (not (loaded ?f ?t))
     )
-    :effect (and
-      (altitude ?s ?o)
-      (at_altitude ?s)
-    )
+    :effect (not (assembled ?f))
   )
   
-  (:action reach-inclination
-    :parameters (?s - spacecraft ?o - orbit)
+  (:action pack
+    :parameters (?f - furniture ?l - location ?t - truck)
     :precondition (and
-      (in-manuever ?s)
-      (not (at_inclination ?s))
-      (not (docked ?s))
+      (not (packed ?f))
+      (not (assembled ?f))
+      (at-location ?l ?f)
+      (truck-location ?l ?t)
+      (not (loaded ?f ?t))
     )
-    :effect (and
-      (inclination ?s ?o)
-      (at_inclination ?s)
-    )
-  )
-  
-  (:action reach-velocity
-    :parameters (?s - spacecraft ?o - orbit)
-    :precondition (and
-      (in-manuever ?s)
-      (not (at_velocity ?s))
-      (not (docked ?s))
-    )
-    :effect (and
-      (velocity ?s ?o)
-      (at_velocity ?s)
-    )
-  )
-  
-  (:action check_stable_orbit
-    :parameters (?s - spacecraft ?o - orbit)
-    :precondition (and
-      (orientation ?s ?o)
-      (altitude ?s ?o)
-      (inclination ?s ?o)
-      (velocity ?s ?o)
-    )
-    :effect (and
-      (stable-orbit ?s ?o)
-      (not (in-manuever ?s))
-      (not (at_orientation ?s))
-      (not (at_altitude ?s))
-      (not (at_inclination ?s))
-      (not (at_velocity ?s))
-    )
+    :effect (packed ?f)
   )
 
-  (:action prepare-for-manuever
-      :parameters (?s - spacecraft ?o - orbit)
-      :precondition (stable-orbit ?s ?o)
-      :effect (and
-        (in-manuever ?s)
-        (not (stable-orbit ?s ?o))
-      )
+  (:action unpack
+    :parameters (?f - furniture ?l - location ?t - truck)
+    :precondition (and
+      (packed ?f)
+      (not (assembled ?f))
+      (at-location ?l ?f)
+      (truck-location ?l ?t)
+      (not (loaded ?f ?t))
+    )
+    :effect (not (packed ?f))
   )
 
-  (:action match-altitude
-    :parameters (?s1 - spacecraft ?s2 - spacecraft ?o - orbit)
+  (:action load_truck
+    :parameters (?f - furniture ?t - truck ?l - location)
     :precondition (and
-      (in-manuever ?s1)
-      (not (docked ?s1))
-      (stable-orbit ?s2 ?o)
-      (not (same-orbit ?s1 ?s2))
-      (not (same-altitude ?s1 ?s2))
+      (packed ?f)
+      (not (assembled ?f))
+      (truck-location ?l ?t)
+      (at-location ?l ?f)
+      (not (loaded ?f ?t))
     )
-    :effect (and
-      (same-altitude ?s1 ?s2)
-      (same-altitude ?s2 ?s1)
-    )
+    :effect (and (loaded ?f ?t) (not (at-location ?l ?f)))
   )
   
-  (:action match-inclination
-    :parameters (?s1 - spacecraft ?s2 - spacecraft ?o - orbit)
+  (:action unload_truck
+    :parameters (?f - furniture ?t - truck ?l - location)
     :precondition (and
-      (in-manuever ?s1)
-      (not (docked ?s1))
-      (stable-orbit ?s2 ?o)
-      (not (same-orbit ?s1 ?s2))
-      (not (same-inclination ?s1 ?s2))
+      (packed ?f)
+      (not (assembled ?f))
+      (truck-location ?l ?t)
+      (not (at-location ?l ?f))
+      (loaded ?f ?t)
     )
-    :effect (and
-      (same-inclination ?s1 ?s2)
-      (same-inclination ?s2 ?s1)
-    )
+    :effect (and (at-location ?l ?f) (not (loaded ?f ?t)))
   )
   
-  (:action match-velocity
-    :parameters (?s1 - spacecraft ?s2 - spacecraft ?o - orbit)
+  (:action travel
+    :parameters (?t - truck ?l1 - location ?l2 - location)
     :precondition (and
-      (in-manuever ?s1)
-      (not (docked ?s1))
-      (stable-orbit ?s2 ?o)
-      (not (same-orbit ?s1 ?s2))
-      (not (same-velocity ?s1 ?s2))
+      (not (truck-location ?l2 ?t))
+      (truck-location ?l1 ?t)
     )
-    :effect (and
-      (same-velocity ?s1 ?s2)
-      (same-velocity ?s2 ?s1)
-    )
-  )
-
-  (:action check-same-orbit
-    :parameters (?s1 - spacecraft ?s2 - spacecraft)
-    :precondition (and
-      (same-altitude ?s1 ?s2)
-      (same-inclination ?s1 ?s2)
-      (same-velocity ?s1 ?s2)
-    )
-    :effect (and
-      (not (in-manuever ?s1))
-      (same-orbit ?s1 ?s2)
-      (same-orbit ?s2 ?s1)
-    )
-  )
-
-  (:action deploy-satellite
-    :parameters (?s - spacecraft ?sat - satellite ?o - orbit)
-    :precondition (and
-      (target-orbit ?o)
-      (stable-orbit ?s ?o)
-      (has-satellite ?s ?sat)
-    )
-    :effect (and
-      (not (has-satellite ?s ?sat))
-      (sat-deployed ?s)
-      (is_in_target_orbit ?sat ?o)
-    )
-  )
-
-  (:action connect-spacecrafts
-    :parameters (?s1 - spacecraft ?s2 - spacecraft)
-    :precondition (and
-      (same-orbit ?s1 ?s2)
-      (not (docked-with ?s1 ?s2))
-      (not (docked-with ?s2 ?s1))
-      (able-to-dock ?s1 ?s2)
-    )
-    :effect (and
-      (docked ?s1)
-      (docked ?s2)
-      (docked-with ?s1 ?s2)
-      (docked-with ?s2 ?s1)
-    )
-  )
-
-  (:action transfer-cargo
-    :parameters (?s1 - spacecraft ?s2 - spacecraft ?c - cargo)
-    :precondition (and
-      (docked-with ?s1 ?s2)
-      (has-cargo ?s1 ?c)
-    )
-    :effect (and 
-      (not (has-cargo ?s1 ?c))
-      (has-cargo ?s2 ?c)
-    )
-  )
-  
-  (:action disconnect-spacecrafts
-    :parameters (?s1 - spacecraft ?s2 - spacecraft)
-    :precondition (and
-      (docked-with ?s1 ?s2)
-      (docked-with ?s2 ?s1)
-    )
-    :effect (and
-      (not (docked ?s1))
-      (not (docked ?s2))
-      (not (docked-with ?s1 ?s2))
-      (not (docked-with ?s2 ?s1))
-    )
+    :effect (and (truck-location ?l2 ?t) (not (truck-location ?l1 ?t)))
   )
 )
