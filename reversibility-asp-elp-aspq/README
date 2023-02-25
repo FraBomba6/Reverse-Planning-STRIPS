@@ -1,0 +1,44 @@
+You will need an ASP solver, e.g. clingo or DLV2. I tested with clingo mostly.
+
+For eclingo, first install Anaconda or Miniconda (I did not test Miniconda):
+https://conda.io/projects/conda/en/latest/user-guide/install/index.html
+Then create a new environment (I call it eclingo, it is the string after -n, feel free to name it differently) with clingo version 5.4.0 (later versions have an incompatible Python API):
+conda create -n eclingo -c conda-forge clingo=5.4.0
+Then activate it:
+conda activate eclingotest
+Now go to a suitable directory, clone the eclingo repository and install it:
+git clone https://github.com/potassco/eclingo.git
+cd src/eclingo/
+pip install .
+
+For plasp, follow https://github.com/potassco/plasp/blob/master/doc/building.md
+
+I included qasp here, as I think it is not available yet. Run with:
+java -jar qasp.jar
+I think it needs Linux to run, as I think there are Linux binaries inside the jar, but I am not sure.
+
+
+generate-nseq-ordered.py creates the example domains I have shown you:
+
+$ ./generate-nseq-ordered.py 2
+(define (domain rev-2-0 )
+  (:requirements :strips)
+  (:predicates (f0) (f1) )
+
+  (:action del-all
+   :precondition (and  (f0) (f1) )
+   :effect (and  (not (f0)) (not (f1)) )
+  )
+
+  (:action add-f0
+   :effect (f0)
+  )
+
+  (:action add-f1
+   :precondition (f0)
+   :effect (f1)
+  )
+
+)
+
+And pddl-to-qasp-uurev.py creates a qasp instance for uniform universal reversibility, its arguments are a pddl file and the reverse plan length. In the last lecture tis file had the name run-pddl-horizon.py .
