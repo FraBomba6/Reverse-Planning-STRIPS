@@ -3,14 +3,13 @@
 <conditions>
     <phi>
         <and>
-            <term> -packed(couch) </term>
+            <term> assembled(couch) </term>
             <term> moved(couch) </term>
         </and>
     </phi>
     <psi>
         <and>
-            <term> packed(couch) </term>
-            <term> moved(couch) </term>
+            <term> assembled(couch) </term>
         </and>
     </psi>
 </conditions>
