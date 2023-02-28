@@ -84,7 +84,7 @@
 %**********************************************
 %* The document starts here
 \begin{document}
-    \handout{4}{Winter Term, 2022/23}{Reverse planning}
+    \handout{7}{Winter Term, 2022/23}{Reverse planning}
 
 
     \section{Introduction}\label{sec:intro}
@@ -193,9 +193,9 @@ plasp translate domain.pddl problem.pddl | cat - <(echo "\#show chosen/1.") > do
         \item \texttt{unload}
         \item \texttt{move}
     \end{itemize}
-    In the Figure~\ref{fig:pddl-reversible} I show the six uniformly reversible actions and the plan that reverse the initial state to the state previous to the chosen actions.
+    In Figure~\ref{fig:pddl-reversible} I show the six uniformly reversible actions and the plan that reverse the initial state to the state previous to the chosen actions.
     For simplicity, I've changed the background information of the problem to have only one piece of furniture and one truck.
-    Changing the background information of the problem doesn't affect the uniformly reversible actions, that increase proportionally to the number of pieces of furniture and trucks.
+    Changing the background information of the problem doesn't affect the uniformly reversible actions, which increase proportionally to the number of pieces of furniture and trucks.
     \begin{figure}[ht]
         \centering
         \includegraphics[width=\textwidth]{../img/unif_rev_actions}
