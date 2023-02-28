@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE conditions SYSTEM "./DTD/conditions.dtd">
+<conditions>
+    <phi>
+        <and>
+            <term> -packed(couch) </term>
+            <term> moved(couch) </term>
+        </and>
+    </phi>
+    <psi>
+        <and>
+            <term> packed(couch) </term>
+            <term> moved(couch) </term>
+        </and>
+    </psi>
+</conditions>

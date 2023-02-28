@@ -1,0 +1,2 @@
+initially: assembled(couch).
+goal: assembled(couch), moved(couch)? (7)

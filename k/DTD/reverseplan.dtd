@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!ELEMENT reverse-plans (plan*)>
+<!ELEMENT plan (action-sequence)>
+<!ATTLIST plan 
+		id CDATA #REQUIRED	
+>
+
+<!ELEMENT action-sequence (action+)>
+<!ELEMENT action (param*)>
+<!ATTLIST action 
+		name CDATA #REQUIRED	
+>
+<!ELEMENT param (#PCDATA)>
+
+
+
+

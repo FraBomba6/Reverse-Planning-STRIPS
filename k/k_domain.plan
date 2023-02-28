@@ -1,0 +1,33 @@
+fluents: assembled(F) requires furniture(F).
+         packed(F) requires furniture(F).
+         loaded(F,T) requires furniture(F), truck(T).
+         moved(F) requires furniture(F).
+
+actions: assemble_furniture(F,T) requires furniture(F), truck(T).
+         disassemble_furniture(F,T) requires furniture(F), truck(T).
+         pack(F,T) requires furniture(F), truck(T).
+         unpack(F,T) requires furniture(F), truck(T).
+         load_truck(F,T) requires furniture(F), truck(T).
+         unload_truck(F,T) requires furniture(F), truck(T).
+         move(F,T) requires furniture(F), truck(T).
+
+always: executable assemble_furniture(F,T) if not assembled(F), not packed(F), not loaded(F,T), moved(F).
+        caused assembled(F) after assemble_furniture(F,T).
+        executable disassemble_furniture(F,T) if assembled(F), not packed(F), not loaded(F,T).
+        caused -assembled(F) after disassemble_furniture(F,T).
+        caused -moved(F) after disassemble_furniture(F,T).
+        executable pack(F,T) if not assembled(F), not packed(F), not loaded(F,T), not moved(F).
+        caused packed(F) after pack(F,T).
+        executable unpack(F,T) if not assembled(F), packed(F), not loaded(F,T), moved(F).
+        caused -packed(F) after unpack(F,T).
+        executable load_truck(F,T) if not assembled(F), packed(F), not loaded(F,T), not moved(F).
+        caused loaded(F,T) after load_truck(F,T).
+        executable unload_truck(F,T) if not assembled(F), packed(F), loaded(F,T), moved(F).
+        caused -loaded(F,T) after unload_truck(F,T).
+        executable move(F,T) if not assembled(F), packed(F), loaded(F,T), not moved(F).
+        caused moved(F) after move(F,T).
+        inertial assembled(F).
+        inertial packed(F).
+        inertial loaded(F,T).
+        inertial moved(F).
+noConcurrency.

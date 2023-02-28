@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!ELEMENT conditions (phi,psi)>
+<!ELEMENT phi (all|exists|or|and|not|term)>
+<!ELEMENT psi (all|exists|or|and|not|term)>
+
+<!ELEMENT all (all|exists|or|and|not|term)>
+<!ATTLIST all
+		quantifier CDATA #REQUIRED
+>
+
+<!ELEMENT exists (all|exists|or|and|not|term)>
+<!ATTLIST exists
+		quantifier CDATA #REQUIRED
+>
+
+<!ELEMENT or (all|exists|or|and|not|term)+>
+<!ELEMENT and (all|exists|or|and|not|term)+>
+<!ELEMENT not (all|exists|or|and|not|term)>
+<!ELEMENT term (#PCDATA)>
+

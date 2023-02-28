@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!ELEMENT search-plan (action-sequence, conditions)>
+<!ATTLIST search-plan 
+		id CDATA #IMPLIED	
+>
+
+<!ELEMENT action-sequence (action*, concurrent-action*)*>
+
+<!ELEMENT concurrent-action (action+)>
+
+<!ELEMENT action (param*)>
+<!ATTLIST action 
+		name CDATA #REQUIRED	
+>
+<!ELEMENT param (#PCDATA)>
+
+<!ELEMENT conditions (pi+)>
+<!ELEMENT pi (all|exists|or|and|not|term)>
+
+<!ELEMENT all (all|exists|or|and|not|term)>
+<!ATTLIST all
+		quantifier CDATA #REQUIRED
+>
+
+<!ELEMENT exists (all|exists|or|and|not|term)>
+<!ATTLIST exists
+		quantifier CDATA #REQUIRED
+>
+
+<!ELEMENT or (all|exists|or|and|not|term)+>
+<!ELEMENT and (all|exists|or|and|not|term)+>
+<!ELEMENT not (all|exists|or|and|not|term)>
+<!ELEMENT term (#PCDATA)>
+
+
