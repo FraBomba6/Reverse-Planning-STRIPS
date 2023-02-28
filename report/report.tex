@@ -136,6 +136,13 @@
     \end{itemize}
     To keep the domain simple and focus more on the uniformly reversible actions, I've decided to assume that the company don't track the location of the trucks.
 
+    In Figure~\ref{fig:domain} there is a graphical representation of the domain states and effects of actions.
+    \begin{figure}[ht]
+        \centering
+        \includegraphics[width=\textwidth]{../img/diagram}
+        \caption{Domain states and effects of actions}
+        \label{fig:domain}
+    \end{figure}
 
     \section{PDDL}\label{sec:pddl}
 
@@ -163,7 +170,7 @@
     The problem is solvable by the planner and the solution is the represented in Figure~\ref{fig:pddl-solution}.
     \begin{figure}[ht]
         \centering
-        \includegraphics[width=0.8\textwidth]{../img/pddl_problem_solution}
+        \includegraphics[width=\textwidth]{../img/pddl_problem_solution}
         \caption{Solution to the problem}
         \label{fig:pddl-solution}
     \end{figure}
@@ -195,13 +202,37 @@ plasp translate domain.pddl problem.pddl | cat - <(echo "\#show chosen/1.") > do
         \caption{Uniformly reversible actions}
         \label{fig:pddl-reversible}
     \end{figure}
-    The action \texttt{disassemble} is not uniformly reversible because there are two different plans that reverse the initial state and they differs based on the initial state, in particular, if it holds or not the predicate \texttt{moved}.
+    The action \texttt{disassemble} is not uniformly reversible because there are two different initial states for the action, as shown in Figure~\ref{fig:domain}, and only one has a reverse plan that reverse the initial state to the state previous to the chosen action (the one where it holds that \texttt{\{assembled, moved\}} is true for the piece of furniture).
 
     \section{K}\label{sec:k}
+    \subsection{Domain and problem description}\label{subsec:k-domain}
     The same domain and problem described in Section~\ref{sec:pddl} can be encoded in the \texttt{K} language.
     The \texttt{K} encoding of the domain is in the file \texttt{k/k\_domain.plan}.
     The \texttt{K} encoding of the problem is in the file \texttt{k/k\_problem.plan}.
     The \texttt{K} encoding of the domain is analogous to the one presented in the PDDL section.
     It was necessary to add the \texttt{inertial} property to all the fluents and to specify the \texttt{noConcurrency} option.
     Also a file containing the background information of the problem was necessary, just to specify the initial objects in the problem.
+
+    Running the $\text{DLV}^k$ planner on the domain and the problem resulted in the same solution as the one found by the PDDL planner.
+    This can be seen in Figure~\ref{fig:k-solution}.
+    \begin{figure}[ht]
+        \centering
+        \includegraphics[width=\textwidth]{../img/k_problem_solution}
+        \caption{Solution to the problem}
+        \label{fig:k-solution}
+    \end{figure}
+
+    \subsection{Reverse plan}\label{subsec:k-reverse}
+    I tried to use \texttt{revplan} software to find the reverse plan of the solution found by the $\text{DLV}^k$ planner but after running the command \mintinline[breaklines, breakafter=_]{shell}{java -cp plan-library-binary.jar planlibrary.ReverseDomain -x k_domain.plan k_background.dl cond.xml /usr/bin/dlv 15} for more than 24 hours, the software didn't find terminate at all (Figure~\ref{fig:k-reverse}).
+    \begin{figure}[ht]
+        \centering
+        \includegraphics[width=\textwidth]{../img/k_reverse}
+        \caption{Reverse plan}
+        \label{fig:k-reverse}
+    \end{figure}
+    Even if the software didn't terminate, from the uniformly reversible actions retrieved in Section~\ref{subsec:pddl-reversible} and what shown in Figure~\ref{fig:domain}, I can state that the reverse plan for each combination of furniture and goal state corresponds to the plan to reverse each single uniformly reversible action.
+
+    Only the cases of the goal states \texttt{\{assembled\}} and \texttt{\{assembled, moved\}} must be discussed.
+    Regarding the second case, the reverse plan corresponds to the concatenation of the actions \texttt{\{disasseble, pack, load, move, unload, unpack, assemble\}}.
+    The first case instead has no reverse plan because there is no actions sequence that can remove the single predicate \texttt{moved} from the state \texttt{\{assembled, moved\}}.
 \end{document}
